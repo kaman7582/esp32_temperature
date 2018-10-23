@@ -17,7 +17,8 @@ black->groud
 
 create a task to read the tempeature sensor
 
+2.connect the device to wifi
 
-2.set mqtt to upload data to server
+3.set mqtt to upload data to server
 
-3.server analyse the data
+4.server analyse the data
