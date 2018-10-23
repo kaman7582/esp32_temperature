@@ -15,6 +15,8 @@ yellow->data
 
 black->groud
 
+create a task to read the tempeature sensor
+
 
 2.set mqtt to upload data to server
 
