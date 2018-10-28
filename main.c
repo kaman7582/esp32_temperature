@@ -248,6 +248,8 @@ void task_main()
 }
 
 #else
+#include "mgos.h"
+
 #define GPIO_OUTPUT_IO_0    18
 #define GPIO_DATA   GPIO_OUTPUT_IO_0
 #define GPIO_TEST    19
@@ -259,6 +261,7 @@ void task_main()
 int data_gpio = 0;
 int test_gpio = 0;
 static int sys_init = 0;
+float cur_temp = 0;
 
 void temp_sensor_init()
 {
@@ -362,7 +365,6 @@ unsigned char gpio_read_byte()
 	return x;
 }
 
-
 void task_main()
 {
     	char temp1=0, temp2=0;
@@ -384,10 +386,11 @@ void task_main()
 				gpio_send_byte(0xBE);
 				temp1=gpio_read_byte();
 				temp2=gpio_read_byte();
-				check_out=reset_sensor();
+				//check_out=reset_sensor();
 				float temp=0;
 				temp=(float)(temp1+(temp2*256))/16;
-				printf("temp:%.2f \n",temp);
+				//printf("temp:%.2f \n",temp);
+				cur_temp = temp;
 			}
 			else
 				continue;
@@ -397,14 +400,53 @@ void task_main()
 	}
 }
 
+static float read_temp(void)
+{
+	char temp1=0, temp2=0;
+
+	if(reset_sensor())
+	{
+		printf("step1,reset_ds18b20 error!\n");
+		return 0;
+	}
+
+	gpio_send_byte(0xcc);
+	gpio_send_byte(0x44);
+	ets_delay_us(4);
+
+	if(reset_sensor())
+	{
+		printf("step2,reset_ds18b20 error!\n");
+		return 0;
+	}
+
+	gpio_send_byte(0xcc);
+	gpio_send_byte(0xbe);
+
+	temp1=gpio_read_byte();
+	temp2=gpio_read_byte();
+	float temp=0;
+	temp=(float)(temp1+(temp2*256))/16;
+
+	return temp;
+}
+
 #endif
+
+static void timer_cb(void *arg) {
+	printf(" timer call %.02f\n",read_temp());
+  	//get_sensor_temp();
+}
 
 
 enum mgos_app_init_result mgos_app_init(void) {
           LOG(LL_INFO, ("Hi there"));
          temp_sensor_init();
-         xTaskCreate(task_main, "apptask", 1024*3, NULL, 10, NULL);
+         //xTaskCreate(task_main, "apptask", 1024*3, NULL, 10, NULL);
+	 //use mongoose timer
 	 
+	// struct mgos_dht *dht = mgos_dht_create(mgos_sys_config_get_app_pin(), DHT22);
+	mgos_set_timer(1000,true,timer_cb,NULL);
          return MGOS_APP_INIT_SUCCESS;
   	
 }
