@@ -5,7 +5,7 @@ step:
 
 1.enable gpio to collect data 
 
-温度传感器 DS18B20
+hw： DS18B20
 
 GPIO ->18
 
