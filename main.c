@@ -249,6 +249,9 @@ void task_main()
 
 #else
 #include "mgos.h"
+#include "mg_rpc.h"
+#include "mgos_service_config.h"
+#include "mgos_rpc.h"
 
 #define GPIO_OUTPUT_IO_0    18
 #define GPIO_DATA   GPIO_OUTPUT_IO_0
@@ -439,6 +442,14 @@ static void timer_cb(void *arg) {
 }
 
 
+static void rpc_cb(struct mg_rpc_request_info *ri, void *cb_arg,
+                   struct mg_rpc_frame_info *fi, struct mg_str args) {
+  mg_rpc_send_responsef(ri, "{value: %lf}", read_temp());
+  (void) fi;
+  (void) args;
+}
+
+
 enum mgos_app_init_result mgos_app_init(void) {
           LOG(LL_INFO, ("Hi there"));
          temp_sensor_init();
@@ -447,6 +458,7 @@ enum mgos_app_init_result mgos_app_init(void) {
 	 
 	// struct mgos_dht *dht = mgos_dht_create(mgos_sys_config_get_app_pin(), DHT22);
 	mgos_set_timer(1000,true,timer_cb,NULL);
+	mg_rpc_add_handler(mgos_rpc_get_global(), "temp.read", "", rpc_cb, NULL);	 
          return MGOS_APP_INIT_SUCCESS;
   	
 }
