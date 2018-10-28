@@ -151,7 +151,7 @@ void task_main()
 				gpio_send_byte(0xBE);
 				temp1=gpio_read_byte();
 				temp2=gpio_read_byte();
-				check_out=reset_sensor();
+				//check_out=reset_sensor();
 				float temp=0;
 				temp=(float)(temp1+(temp2*256))/16;
 				printf("temp:%.2f \n",temp);
